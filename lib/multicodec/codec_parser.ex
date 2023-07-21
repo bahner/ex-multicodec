@@ -35,17 +35,28 @@ defmodule Multicodec.CodecParser do
        )
   end
 
+  @spec inspect_table(
+          atom | pid,
+          binary
+          | maybe_improper_list(
+              binary | maybe_improper_list(any, binary | []) | char,
+              binary | []
+            )
+        ) :: :ok
   @doc """
   Puts the codec table from the Multicodec's official CSV file to the given device.
   """
   @spec inspect_table(atom() | pid()) :: :ok
   def inspect_table(device \\ :stdio, path \\ @default_table_path) do
     codec_data = parse_table(path)
-    |> (fn (mapping) ->[?[, Enum.map(mapping, &inspect(&1, limit: :infinity))
-                    |> Enum.intersperse(",\n"), ?]] end).()
-    IO.puts(device, codec_data)
+                 |> Enum.map(&inspect_mapping(&1))
+                 |> Enum.join(",\n")
+    IO.puts(device, "[#{codec_data}]")
   end
 
+  defp inspect_mapping(mapping) do
+    "{#{inspect(mapping.name)},#{inspect(mapping.code)}}"
+  end
 
   defp parse_code(<<"0x", rest::binary>>) do
     {n, _} = Integer.parse(rest, 16)
