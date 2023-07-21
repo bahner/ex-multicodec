@@ -30,7 +30,7 @@ defmodule Multicodec.CodecParser do
            }} ->
             parsed_code = parse_code(code)
             [MulticodecMapping.new(codec, parsed_code)]
-          _ -> []
+          _ -> :error
          end
        )
   end
